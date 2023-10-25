@@ -10,8 +10,21 @@ const {
 const testSuiteName = 'Debug Tests';
 const scoresDir = path.join(__dirname, '..', 'scores');
 const scoreCounter = new ScoreCounter(testSuiteName, scoresDir);
+let logSpy;
 
 describe(testSuiteName, () => {
+  // IGNORE PLEASE
+  beforeEach(() => {
+    // remember, this is how Jest lets us check and see if console.log was ever called.
+    // we need to "spy" on the method because there's no return value to check against
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+    scoreCounter.add(expect)
+  })
+  afterEach(() => {
+    logSpy.mockRestore();
+  })
+  afterAll(scoreCounter.export);
+
   it('myEvery - returns true if all values in the array make the callback return a truthy value', () => {
     const oddNums = [1, 3, 5, 7, 9];
     const areAllNumsOdd1 = myEvery(oddNums, (num) => num % 2);
@@ -63,9 +76,6 @@ describe(testSuiteName, () => {
   it('logEachName - logs each user to the console', () => {
     const names = ['Alice', 'Bob', 'Charlie', 'Diana'];
 
-    // remember, this is how Jest lets us check and see if console.log was ever called.
-    // we need to "spy" on the method because there's no return value to check against
-    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     logEachName(names);
 
     expect(logSpy).toHaveBeenCalledTimes(4);
@@ -75,7 +85,6 @@ describe(testSuiteName, () => {
     expect(logSpy).toHaveBeenNthCalledWith(2, 'Bob', 1, ['Alice', 'Bob', 'Charlie', 'Diana']);
     expect(logSpy).toHaveBeenNthCalledWith(3, 'Charlie', 2, ['Alice', 'Bob', 'Charlie', 'Diana']);
     expect(logSpy).toHaveBeenNthCalledWith(4, 'Diana', 3, ['Alice', 'Bob', 'Charlie', 'Diana']);
-    logSpy.mockRestore();
 
     scoreCounter.correct(expect); // DO NOT TOUCH
   });
@@ -88,7 +97,6 @@ describe(testSuiteName, () => {
       { name: 'Diana', bio: 'Diana is a doctor' },
     ];
 
-    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     logEachUserBio(users);
 
     expect(logSpy).toHaveBeenCalledTimes(4);
@@ -96,12 +104,7 @@ describe(testSuiteName, () => {
     expect(logSpy).toHaveBeenNthCalledWith(2, 'Bob is a teacher');
     expect(logSpy).toHaveBeenNthCalledWith(3, 'Charlie is a student');
     expect(logSpy).toHaveBeenNthCalledWith(4, 'Diana is a doctor');
-    logSpy.mockRestore();
 
     scoreCounter.correct(expect); // DO NOT TOUCH
   });
-
-  // IGNORE PLEASE
-  beforeEach(() => scoreCounter.add(expect));
-  afterAll(scoreCounter.export);
 });
